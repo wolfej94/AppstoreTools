@@ -29,7 +29,7 @@ let appInfo = try await appstoreTools.getAppInformation()
 - Use the needsUpdate(appInfo:) method to determine if an update is required.
 ```
 if try await appstoreTools.needsUpdate(appInfo: appInfo) {
-// Perform update-related actions
+    // Perform update-related actions
 }
 ```
 - Schedule automatic review prompts based on the number of launches.
@@ -55,7 +55,7 @@ try? appstoreTools.scheduleDailyUpdateCheck(for: .init(hour: 3, minute: 0, secon
 // Get app information and check for updates
 let appInfo = try await appstoreTools.getAppInformation()
 if try await appstoreTools.needsUpdate(appInfo: appInfo) {
-// Perform update-related actions
+    // Perform update-related actions
 }
 ```
 
