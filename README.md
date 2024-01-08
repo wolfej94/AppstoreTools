@@ -43,6 +43,16 @@ appstoreTools.scheduleReview(onLaunchMultiplesOf: 5)
 appstoreTools.requestReview()
 ```
 
+- Handle launch notifications and open the App Store if an update is required.
+```
+// Handle launch notifications
+if appstoreTools.handleLaunch(notification: yourNotification) {
+    // The notification was handled by Appstore Tools
+} else {
+    // The notification was not handled by Appstore Tools, perform your app-specific handling
+}
+```
+
 ### Example
 ```
 import AppstoreTools

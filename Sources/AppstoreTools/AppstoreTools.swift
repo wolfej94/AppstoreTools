@@ -91,6 +91,17 @@ public class AppstoreTools {
         }
     }
     
+    /// Handle launch notifications and opens the appstore if a update is required
+    /// - Parameter notification: The notification passed to the app on launch when itneracting with a push notification
+    /// - Returns: Whether or not the notification is handled by this package
+    public func handleLaunch(notification: Notification) -> Bool {
+        guard let urlString = notification.userInfo?["appstore_url"] as? String, let url = URL(string: urlString) else {
+            return false
+        }
+        UIApplication.shared.open(url)
+        return true
+    }
+    
     /// Code to be ran when the app enters the foreground
     /// - Parameter notification: Notification that gets sent via the notification center when the app enters the foreground
     private func onEnterForeground(_ notification: Notification? = nil) {
