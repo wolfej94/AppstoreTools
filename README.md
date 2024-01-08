@@ -23,7 +23,9 @@ let appstoreTools = AppstoreTools()
 try? appstoreTools.scheduleDailyUpdateCheck(for: .init(hour: 3, minute: 0, second: 0))
 ```
 - Implement the getAppInformation() method to retrieve app information from the App Store. (Note: a placeholder .testContent is provided for testing purposes.)
-`let appInfo = try await appstoreTools.getAppInformation()`
+```
+let appInfo = try await appstoreTools.getAppInformation()
+```
 - Use the needsUpdate(appInfo:) method to determine if an update is required.
 ```
 if try await appstoreTools.needsUpdate(appInfo: appInfo) {
