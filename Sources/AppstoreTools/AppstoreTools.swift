@@ -3,6 +3,7 @@
 
 import UIKit
 import BackgroundTasks
+import StoreKit
 
 public class AppstoreTools {
     
@@ -13,6 +14,15 @@ public class AppstoreTools {
     private let notificationManager = NotificationManager()
     private let calendar: Calendar
     private var timer: Timer?
+    
+    private var launchNumber: Int {
+        get {
+            return userDefaults.integer(forKey: "LaunchNumber")
+        }
+        set {
+            userDefaults.set(newValue, forKey: "LaunchNumber")
+        }
+    }
     
     private var scheduleDateComponents: DateComponents {
         get {
@@ -33,6 +43,7 @@ public class AppstoreTools {
         self.bundle = bundle
         self.calendar = calendar
         self.userDefaults = userDefaults
+        self.launchNumber += 1
         NotificationCenter.default.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
             object: nil,
@@ -117,19 +128,39 @@ public class AppstoreTools {
     
     /// Gets the current version string for an app from appstore connect using https://itunes.apple.com/lookup?bundleId=your_bundle_id_here
     public func getAppInformation() async throws -> AppInfoResponse {
-//        var components = URLComponents(string: "https://itunes.apple.com/lookup")!
-//        components.queryItems = [.init(name: "bundleId", value: bundle.bundleIdentifier)]
-//        let url = components.url!
-//        let data = try await URLSession.shared.data(from: url).0
-//        
-//        let decoder = JSONDecoder()
-//        let dateFormatter = DateFormatter(format: "yyyy-MM-dd'T'HH:mm:ssZ")
-//        decoder.dateDecodingStrategy = .formatted(dateFormatter)
-//        guard var result = try decoder.decode(AppInfoParentResponse.self, from: data).results.first else {
-//            throw "No result for bundle ID \(bundle.bundleIdentifier ?? "")"
-//        }
-//        return result
-        return .testContent
+        var components = URLComponents(string: "https://itunes.apple.com/lookup")!
+        components.queryItems = [.init(name: "bundleId", value: bundle.bundleIdentifier)]
+        let url = components.url!
+        let data = try await URLSession.shared.data(from: url).0
+        
+        let decoder = JSONDecoder()
+        let dateFormatter = DateFormatter(format: "yyyy-MM-dd'T'HH:mm:ssZ")
+        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        guard let result = try decoder.decode(AppInfoParentResponse.self, from: data).results.first else {
+            throw "No result for bundle ID \(bundle.bundleIdentifier ?? "")"
+        }
+        return result
+    }
+    
+    /// If the the currently tracked number of launches is a multiple of the provided integer and is not zero the app requests a review for the app from the user
+    /// - Parameter launchMultiple: The multiple that we check against the tracked number of launches in order to dictate whether a review is requested
+    public func scheduleReview(onLaunchMultiplesOf launchMultiple: Int) {
+        if launchNumber != .zero && launchNumber.isMultiple(of: launchMultiple) {
+            requestReview()
+        }
+    }
+    
+    /// Immediately requests a review for the app from the user
+    public func requestReview() {
+        if #available(iOS 14.0, *) {
+            if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                DispatchQueue.main.async {
+                    SKStoreReviewController.requestReview(in: scene)
+                }
+            }
+        } else {
+            SKStoreReviewController.requestReview()
+        }
     }
     
     /// Compares the current version to the one in the bundle and indicates whether the app needs updating or not
